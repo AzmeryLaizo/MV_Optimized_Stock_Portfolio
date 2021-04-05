@@ -33,6 +33,7 @@ SELECT * FROM eod_quotes LIMIT 10;
 
 ----------------------------------------------
 ----------------- Import S&P500 --------------
+----------------------------------------------
 CREATE TABLE public.eod_indices
 (
     symbol character varying(16) COLLATE pg_catalog."default" NOT NULL,
@@ -75,22 +76,10 @@ TABLESPACE pg_default;
 ALTER TABLE public.custom_calendar
     OWNER to postgres;
 
--- CHECK
+---------------------Check-----------------
 SELECT * FROM custom_calendar LIMIT 10;
 
-
-/*
--- LIFELINE
-ALTER TABLE public.custom_calendar
-    ADD COLUMN eom smallint;
-
-
-ALTER TABLE public.custom_calendar
-    ADD COLUMN prev_trading_day date;
-*/
--- CHECK
-SELECT * FROM custom_calendar LIMIT 10;
--- Update the table with new data (this will take some time)
+-- Update the table with new data 
 UPDATE custom_calendar
 SET prev_trading_day = PTD.ptd
 FROM (SELECT date, (SELECT MAX(CC.date) 
@@ -100,7 +89,8 @@ WHERE CC.trading=1 AND CC.date<custom_calendar.date) ptd
 WHERE custom_calendar.date = PTD.date;
 -- CHECK
 SELECT * FROM custom_calendar ORDER BY date;
--- Update the table with new data (this will take some time)
+
+---- Update the table with new data ----
 UPDATE custom_calendar
 SET eom = EOMI.endofm
 FROM (SELECT CC.date,CASE WHEN EOM.y IS NULL THEN 0 ELSE 1 END endofm 
